@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-api-1/controllers/pageController"
 	"go-api-1/controllers/userController"
 
 	"github.com/gin-gonic/gin"
@@ -8,9 +9,16 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
+	r.Static("css/", "./public/css/")
+	r.Static("js/", "./public/js/")
+
+	r.GET("/", pageController.GetHomePage)
+	r.GET("/signup", pageController.GetSignUpPage)
+	r.GET("/login", pageController.GetLoginPage)
 
 	r.GET("/api/user", userController.GetUsers)
-	r.GET("/api/user/:id", userController.GetUser)
+	r.GET("/api/user/:username", userController.GetUser)
 	r.POST("/api/user/signup", userController.CreateUser)
 
 	err := r.Run()

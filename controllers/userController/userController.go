@@ -1,9 +1,9 @@
 package userController
 
 import (
-	"fmt"
 	"go-api-1/modules/userModules"
 	"go-api-1/types"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,9 +20,9 @@ func GetUsers(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	id := c.Param("id")
+	username := c.Param("username")
 
-	user, err := userModules.GetUserByID(id)
+	user, err := userModules.GetUserByUsername(username)
 
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
@@ -38,21 +38,59 @@ func GetUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	var newUser types.User
+	var newUser struct {
+		Name     string `json:"name"`
+		Surname  string `json:"surname"`
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	var errors = make(map[string]interface{})
 
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		c.JSON(400, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	fmt.Println("newUser", newUser)
+	if newUser.Name == "" {
+		errors["name"] = "name is required"
+	}
 
-	// createdUser, err := userModules.CreateUser(newUser)
+	if newUser.Surname == "" {
+		errors["surname"] = "surname is required"
+	}
 
-	// if err != nil {
-	// 	c.JSON(500, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	if newUser.Username == "" {
+		errors["username"] = "username is required"
+	} else if userModules.UsernameIsUsed(newUser.Username) {
+		errors["username"] = "username id used"
+	}
 
-	// c.JSON(201, createdUser)
+	if newUser.Password == "" {
+		errors["password"] = "password is required"
+	} else if len(newUser.Password) < 8 {
+		errors["password"] = "password must be at least 8 characters long"
+	}
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"errors":  errors,
+		})
+		return
+	}
+
+	user := types.User{
+		ID:       userModules.GenerateID(),
+		Name:     newUser.Name,
+		Surname:  newUser.Surname,
+		Username: newUser.Username,
+		Password: newUser.Password,
+	}
+
+	userModules.AddUser(user)
+
+	c.IndentedJSON(http.StatusCreated, gin.H{
+		"success": true,
+	})
 }
