@@ -66,18 +66,6 @@ func GetUserByUsername(username string) (types.User, error) {
 	return types.User{}, nil
 }
 
-func UsernameIsUsed(username string) bool {
-	users, _ := GetAllUsers()
-
-	for _, user := range users {
-		if user.Username == username {
-			return true
-		}
-	}
-
-	return false
-}
-
 func AddUser(user types.User) {
 	users, _ := GetAllUsers()
 

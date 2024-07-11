@@ -1,6 +1,13 @@
 document.getElementById("form").addEventListener('submit', async (event) => {
     event.preventDefault();
-    
+
+    const keys = ["name", "surname", "username", "password"];
+
+    keys.forEach(key => {
+        document.getElementById(key).style.borderColor = "#ced4da";
+        document.getElementById(`${key}error`).innerText = "";
+    });
+
     const form = document.getElementById("form");
     const formData = new FormData(form);
 
@@ -17,5 +24,14 @@ document.getElementById("form").addEventListener('submit', async (event) => {
         })
     });
 
-    console.log(await res.json());
+    res = await res.json()
+
+    if (res.success) {
+        window.location.href = "/login"
+    } else {
+        Object.keys(res.errors).forEach(key => {
+            document.getElementById(key).style.borderColor = "rgb(255, 0, 0)";
+            document.getElementById(`${key}error`).innerText = res.errors[key];
+        });
+    };
 });

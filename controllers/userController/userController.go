@@ -62,8 +62,12 @@ func CreateUser(c *gin.Context) {
 
 	if newUser.Username == "" {
 		errors["username"] = "username is required"
-	} else if userModules.UsernameIsUsed(newUser.Username) {
-		errors["username"] = "username id used"
+	} else {
+		user, _ := userModules.GetUserByUsername(newUser.Username)
+
+		if !types.IsEmpty(user) {
+			errors["username"] = "username id used"
+		}
 	}
 
 	if newUser.Password == "" {

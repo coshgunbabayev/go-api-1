@@ -9,9 +9,11 @@ import (
 
 func main() {
 	r := gin.Default()
+
 	r.LoadHTMLGlob("templates/*")
-	r.Static("css/", "./public/css/")
-	r.Static("js/", "./public/js/")
+	r.Static("/js", "./public/js")
+	r.Static("/image", "./public/image")
+	r.Static("/css", "./public/css")
 
 	r.GET("/", pageController.GetHomePage)
 	r.GET("/signup", pageController.GetSignUpPage)
