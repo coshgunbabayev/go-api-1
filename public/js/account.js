@@ -1,4 +1,4 @@
-const loginForm = () => {
+function loginForm() {
     document.getElementById("form").innerHTML = `
     <h2 class="text-uppercase text-center mb-5" >Login</h2>
         <form id="loginform">
@@ -34,7 +34,8 @@ const loginForm = () => {
     `;
 };
 
-const signupForm = () => {
+
+function signupForm() {
     document.getElementById("form").innerHTML = `
     <h2 class="text-uppercase text-center mb-5" >Create an account</h2>
         <form id="signupform">
@@ -88,7 +89,7 @@ const signupForm = () => {
 
 loginForm();
 
-const signupSbmt = async (event) => {
+async function signupSbmt(event) {
     event.preventDefault();
     
     const keys = ["S_name", "S_surname", "S_username", "S_password"];
@@ -117,7 +118,7 @@ const signupSbmt = async (event) => {
     res = await res.json()
 
     if (res.success) {
-        window.location.href = "/login"
+        loginForm()
     } else {
         Object.keys(res.errors).forEach(key => {
             document.getElementById(`S_${key}`).style.borderColor = "rgb(255, 0, 0)";
@@ -126,7 +127,7 @@ const signupSbmt = async (event) => {
     };
 };
 
-const loginSbmt = async (event) => {
+async function loginSbmt(event) {
     event.preventDefault();
     
     const keys = ["L_username", "L_password"];

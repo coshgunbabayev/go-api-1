@@ -1,12 +1,15 @@
-package controller
+package handler
 
 import (
 	"go-api-1/models"
 	"go-api-1/modules/hash"
 	"go-api-1/types"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func GetUsers(c *gin.Context) {
@@ -30,16 +33,25 @@ func GetUser(c *gin.Context) {
 	user, err := userModel.GetByUsername(username)
 
 	if err != nil {
-		c.JSON(404, gin.H{"error": err.Error()})
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "User not found",
+		})
 		return
 	}
 
 	if types.IsEmpty(user) {
-		c.JSON(404, gin.H{"error": "User not found"})
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "User not found",
+		})
 		return
 	}
 
-	c.JSON(200, user)
+	c.JSON(200, gin.H{
+		"success": true,
+		"user":    user,
+	})
 }
 
 func CreateUser(c *gin.Context) {
@@ -84,7 +96,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	if len(errors) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(400, gin.H{
 			"success": false,
 			"errors":  errors,
 		})
@@ -103,7 +115,7 @@ func CreateUser(c *gin.Context) {
 
 	userModel.Create(user)
 
-	c.IndentedJSON(http.StatusCreated, gin.H{
+	c.JSON(201, gin.H{
 		"success": true,
 	})
 }
@@ -117,7 +129,7 @@ func LoginUser(c *gin.Context) {
 	var errors = make(map[string]interface{})
 
 	if err := c.ShouldBindJSON(&loginUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -130,7 +142,7 @@ func LoginUser(c *gin.Context) {
 	}
 
 	if len(errors) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(400, gin.H{
 			"success": false,
 			"errors":  errors,
 		})
@@ -166,7 +178,16 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["userId"] = user.ID
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	tokenString, _ := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+
+	c.SetCookie("token", tokenString, int(time.Hour.Seconds()*72), "/", "localhost", false, true)
+
+	c.JSON(201, gin.H{
 		"success": true,
 	})
 }

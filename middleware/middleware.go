@@ -1,39 +1,107 @@
 package middleware
 
 import (
-	"net/http"
+	"fmt"
+	"go-api-1/models"
+	"go-api-1/types"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
-func Authenticate() gin.HandlerFunc {
+func AuthenticateForPage() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// // JWT token'ı veya cookie'den token al
-		// tokenString, err := c.Cookie("access_token")
-		// if err != nil {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz erişim"})
-		// 	c.Abort()
-		// 	return
-		// }
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.Redirect(302, "/account")
+			c.Abort()
+			return
+		}
 
-		// // JWT token'ı doğrula
-		// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 	// Token doğrulama anahtarını burada ayarlayın (örneğin, bir gizli anahtar)
-		// 	return []byte("gizli_anahtar"), nil
-		// })
-		// if err != nil || !token.Valid {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Geçersiz token"})
-		// 	c.Abort()
-		// 	return
-		// }
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		fmt.Println("token: ", token)
 
-		// // Token geçerli ise, isteği devam ettir
-		// c.Next()
+		if err != nil || !token.Valid {
+			c.Redirect(302, "/account")
+			c.Abort()
+			return
+		}
 
-		aaa := c.Param("aaa")
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userId := claims["userId"].(string)
 
-		if aaa == "salam" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Geçersiz token"})
+			var userModel models.UserModel
+
+			user, _ := userModel.GetByID(userId)
+
+			if types.IsEmpty(user) {
+				c.Redirect(302, "/account")
+				c.Abort()
+				return
+			}
+
+			c.Set("user", user)
+		} else {
+			c.Redirect(302, "/account")
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func AuthenticateForAPI() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.JSON(302, gin.H{
+				"success": false,
+				"message": "Unauthorized",
+			})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		fmt.Println("token: ", token)
+
+		if err != nil || !token.Valid {
+			c.JSON(302, gin.H{
+				"success": false,
+				"message": "Unauthorized",
+			})
+			c.Abort()
+			return
+		}
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userId := claims["userId"].(string)
+
+			var userModel models.UserModel
+
+			user, _ := userModel.GetByID(userId)
+
+			if types.IsEmpty(user) {
+				c.JSON(302, gin.H{
+					"success": false,
+					"message": "Unauthorized",
+				})
+				c.Abort()
+				return
+			}
+
+			c.Set("user", user)
+		} else {
+			c.JSON(302, gin.H{
+				"success": false,
+				"message": "Unauthorized",
+			})
 			c.Abort()
 			return
 		}

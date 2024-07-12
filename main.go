@@ -1,12 +1,22 @@
 package main
 
 import (
-	"go-api-1/controller"
+	"go-api-1/handler"
+	"go-api-1/middleware"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lpernett/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
+	// gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
 
 	r.LoadHTMLGlob("templates/*")
@@ -14,34 +24,39 @@ func main() {
 	r.Static("/image", "./public/image")
 	r.Static("/css", "./public/css")
 
-	r.GET("/", controller.GetHomePage)
-	r.GET("/account", controller.GetAccountPage)
+	page := r.Group("/")
+	{
+		page.GET("/", middleware.AuthenticateForPage(), handler.GetHomePage)
+		page.GET("/account", handler.GetAccountPage)
+		page.GET("/user/:username", middleware.AuthenticateForPage(), handler.GetUserPage)
+	}
 
 	api := r.Group("/api")
 	{
 		userAPI := api.Group("/user")
 		{
-			userAPI.GET("/", controller.GetUsers)
-			userAPI.GET("/:username", controller.GetUser)
-			userAPI.POST("/signup", controller.CreateUser)
-			userAPI.POST("/login", controller.LoginUser)
+			userAPI.GET("/", handler.GetUsers)
+			userAPI.GET("/:username", middleware.AuthenticateForAPI(), handler.GetUser)
+			userAPI.POST("/signup", handler.CreateUser)
+			userAPI.POST("/login", handler.LoginUser)
 		}
 
 		// postAPI := api.Group("/post")
 		// {
-		// 	postAPI.GET("/", controller.GetPosts)
-		//     postAPI.GET("/:id", controller.GetPost)
-		//     postAPI.POST("/", controller.CreatePost)
-		//     postAPI.PUT("/:id", controller.UpdatePost)
-		//     postAPI.DELETE("/:id", controller.DeletePost)
+		// 	postAPI.GET("/", handler.GetPosts)
+		//     postAPI.GET("/:id", handler.GetPost)
+		//     postAPI.POST("/", handler.CreatePost)
+		//     postAPI.PUT("/:id", handler.UpdatePost)
+		//     postAPI.DELETE("/:id", handler.DeletePost)
 		// }
 	}
 
-	// r.GET("/api/salam/:aaa", middleware.Authenticate(), func(ctx *gin.Context) {
-	// 	ctx.JSON(200, gin.H{"message": "Salam " + ctx.Param("aaa")})
-	// })
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	err := r.Run()
+	err = r.Run(":" + port)
 	if err != nil {
 		panic("Failed to start the server")
 	}

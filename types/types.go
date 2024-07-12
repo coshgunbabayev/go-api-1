@@ -3,16 +3,16 @@ package types
 import "reflect"
 
 type User struct {
-	ID       string `json:"id"`
+	ID       string `json:"-"`
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 type Post struct {
 	ID      int    `json:"id"`
-	UserID  string `json:"userid"`
+	UserID  string `json:"-"`
 	Content string `json:"content"`
 }
 

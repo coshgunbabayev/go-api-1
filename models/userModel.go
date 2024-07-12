@@ -5,6 +5,8 @@ import (
 	"go-api-1/database"
 	"go-api-1/modules/generate"
 	"go-api-1/types"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserModel struct {
@@ -42,6 +44,16 @@ func (*UserModel) GetAll() ([]types.User, error) {
 	}
 
 	return users, nil
+}
+
+func (*UserModel) GetReqUser(c *gin.Context) types.User {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(401, gin.H{"error": "Unauthorized"})
+		return types.User{}
+	}
+
+	return user.(types.User)
 }
 
 func (*UserModel) GetByID(id string) (types.User, error) {

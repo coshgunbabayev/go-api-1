@@ -1,0 +1,23 @@
+body {
+    background: #232321;
+}
+
+.card {
+    border-radius: 0px;
+    transition: 0.3s;
+    border: none;
+
+    &:hover {
+        transition: all 1s ease-in-out;
+        background-color: #e3e3e3;
+    }
+
+    a {
+        color: initial;
+        text-decoration: none;
+    }
+
+    .text-muted i {
+        margin: 0 5px;
+    }
+}
