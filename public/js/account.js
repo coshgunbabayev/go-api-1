@@ -1,6 +1,6 @@
 function loginForm() {
     document.getElementById("form").innerHTML = `
-    <h2 class="text-uppercase text-center mb-5" >Login</h2>
+        <h2 class="text-uppercase text-center mb-5" >Login</h2>
         <form id="loginform">
 
             <div class="form-outline mb-4">
@@ -37,7 +37,7 @@ function loginForm() {
 
 function signupForm() {
     document.getElementById("form").innerHTML = `
-    <h2 class="text-uppercase text-center mb-5" >Create an account</h2>
+        <h2 class="text-uppercase text-center mb-5" >Create an account</h2>
         <form id="signupform">
 
             <div class="form-outline mb-4">

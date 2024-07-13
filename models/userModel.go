@@ -79,10 +79,8 @@ func (*UserModel) GetByUsername(username string) (types.User, error) {
 func (*UserModel) Create(user types.User) error {
 	db := database.GetDatabase()
 
-	result, err := db.Exec("INSERT INTO users (id, name, surname, username, password) VALUES (?, ?, ?, ?, ?)",
+	_, err := db.Exec("INSERT INTO users (id, name, surname, username, password) VALUES (?, ?, ?, ?, ?)",
 		user.ID, user.Name, user.Surname, user.Username, user.Password)
-
-	fmt.Println(result)
 
 	if err != nil {
 		fmt.Println(err)

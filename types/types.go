@@ -11,9 +11,9 @@ type User struct {
 }
 
 type Post struct {
-	ID      int    `json:"id"`
-	UserID  string `json:"-"`
-	Content string `json:"content"`
+	ID     string `json:"id"`
+	UserID string `json:"-"`
+	Text   string `json:"text"`
 }
 
 func IsEmpty(value interface{}) bool {

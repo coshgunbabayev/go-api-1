@@ -22,7 +22,10 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(200, users)
+	c.IndentedJSON(200, gin.H{
+		"success": true,
+		"users":   users,
+	})
 }
 
 func GetUser(c *gin.Context) {
@@ -55,7 +58,7 @@ func GetUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	var newUser struct {
+	var body struct {
 		Name     string `json:"name"`
 		Surname  string `json:"surname"`
 		Username string `json:"username"`
@@ -64,34 +67,34 @@ func CreateUser(c *gin.Context) {
 
 	var errors = make(map[string]interface{})
 
-	if err := c.ShouldBindJSON(&newUser); err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if newUser.Name == "" {
+	if body.Name == "" {
 		errors["name"] = "name is required"
 	}
 
-	if newUser.Surname == "" {
+	if body.Surname == "" {
 		errors["surname"] = "surname is required"
 	}
 
-	if newUser.Username == "" {
+	if body.Username == "" {
 		errors["username"] = "username is required"
 	} else {
 		var userModel models.UserModel
 
-		user, _ := userModel.GetByUsername(newUser.Username)
+		user, _ := userModel.GetByUsername(body.Username)
 
 		if !types.IsEmpty(user) {
 			errors["username"] = "username is used"
 		}
 	}
 
-	if newUser.Password == "" {
+	if body.Password == "" {
 		errors["password"] = "password is required"
-	} else if len(newUser.Password) < 8 {
+	} else if len(body.Password) < 8 {
 		errors["password"] = "password must be at least 8 characters long"
 	}
 
@@ -105,10 +108,10 @@ func CreateUser(c *gin.Context) {
 
 	user := types.User{
 		ID:       models.GenerateIDForUser(),
-		Name:     newUser.Name,
-		Surname:  newUser.Surname,
-		Username: newUser.Username,
-		Password: hash.HashPassword(newUser.Password),
+		Name:     body.Name,
+		Surname:  body.Surname,
+		Username: body.Username,
+		Password: hash.HashPassword(body.Password),
 	}
 
 	var userModel models.UserModel
@@ -121,23 +124,23 @@ func CreateUser(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var loginUser struct {
+	var body struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
 
 	var errors = make(map[string]interface{})
 
-	if err := c.ShouldBindJSON(&loginUser); err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	if loginUser.Username == "" {
+	if body.Username == "" {
 		errors["username"] = "username is required"
 	}
 
-	if loginUser.Password == "" {
+	if body.Password == "" {
 		errors["password"] = "password is required"
 	}
 
@@ -151,7 +154,7 @@ func LoginUser(c *gin.Context) {
 
 	var userModel models.UserModel
 
-	user, err := userModel.GetByUsername(loginUser.Username)
+	user, err := userModel.GetByUsername(body.Username)
 
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
@@ -168,7 +171,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	if !hash.CheckPasswordHash(loginUser.Password, user.Password) {
+	if !hash.CheckPasswordHash(body.Password, user.Password) {
 		errors["password"] = "password is invalid"
 
 		c.JSON(400, gin.H{

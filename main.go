@@ -41,14 +41,13 @@ func main() {
 			userAPI.POST("/login", handler.LoginUser)
 		}
 
-		// postAPI := api.Group("/post")
-		// {
-		// 	postAPI.GET("/", handler.GetPosts)
-		//     postAPI.GET("/:id", handler.GetPost)
-		//     postAPI.POST("/", handler.CreatePost)
-		//     postAPI.PUT("/:id", handler.UpdatePost)
-		//     postAPI.DELETE("/:id", handler.DeletePost)
-		// }
+		postAPI := api.Group("/post")
+		{
+			postAPI.GET("/", middleware.AuthenticateForAPI(), handler.GetPosts)
+			postAPI.GET("/:id", middleware.AuthenticateForAPI(), handler.GetPost)
+			postAPI.POST("/", middleware.AuthenticateForAPI(), handler.CreatePost)
+			postAPI.DELETE("/:id", middleware.AuthenticateForAPI(), handler.DeletePost)
+		}
 	}
 
 	port := os.Getenv("PORT")
