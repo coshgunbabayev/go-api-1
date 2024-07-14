@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"go-api-1/models"
@@ -25,5 +25,15 @@ func GetUserPage(c *gin.Context) {
 	c.HTML(200, "user.html", gin.H{
 		"user":     userModel.GetReqUser(c),
 		"username": username,
+	})
+}
+
+func GetPostPage(c *gin.Context) {
+	id := c.Param("id")
+	var userModel models.UserModel
+
+	c.HTML(200, "post.html", gin.H{
+		"user": userModel.GetReqUser(c),
+		"id":   id,
 	})
 }

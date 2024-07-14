@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"go-api-1/models"
@@ -43,7 +43,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	if types.IsEmpty(user) {
+	if user.IsEmpty() {
 		c.JSON(404, gin.H{
 			"success": false,
 			"message": "User not found",
@@ -87,7 +87,7 @@ func CreateUser(c *gin.Context) {
 
 		user, _ := userModel.GetByUsername(body.Username)
 
-		if !types.IsEmpty(user) {
+		if !user.IsEmpty() {
 			errors["username"] = "username is used"
 		}
 	}
@@ -161,7 +161,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	if types.IsEmpty(user) {
+	if user.IsEmpty() {
 		errors["username"] = "username is invalid"
 
 		c.JSON(400, gin.H{

@@ -3,7 +3,7 @@
 
 <head>
     {{ template "headtags.html" . }}
-    <title>Home</title>
+    <title>Post</title>
 </head>
 
 <body>
@@ -11,10 +11,14 @@
 
     {{ template "mainopening.html" . }}
 
-    <div class="card">
+    <span style="display: none;" id="id">{{ .id }}</span>
+
+    <div id="postDetails"></div>
+
+    <div class="card" id="form">
         <div class="card-body">
 
-            <h4 class="card-title">Share new post</h2>
+            <h4 class="card-title">Share comment</h2>
                 <form id="postform">
 
                     <div class="form-outline mb-4">
@@ -22,7 +26,7 @@
                         <span id="texterror" class="error"></span>
                     </div>
 
-                    <button type="submit" onclick="postSbmt(event, '/api/post')" class="btn btn-primary">
+                    <button type="submit" onclick="postSbmt(event, '/api/post/{{ .id }}')" class="btn btn-primary">
                         Share
                     </button>
 
@@ -30,13 +34,15 @@
         </div>
     </div>
 
-    <div id="posts"></div>
+    <div id="commentshead"></div>
+
+    <div id="comments"></div>
 
     {{ template "mainclosure.html" . }}
 
     <script src="/js/modules/post.js"></script>
-    <script src="/js/index.js"></script>
     <script src="/js/share.js"></script>
+    <script src="/js/post.js"></script>
 </body>
 
 </html>

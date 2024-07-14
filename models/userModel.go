@@ -19,7 +19,7 @@ func GenerateIDForUser() string {
 
 	user, _ := userModel.GetByID(id)
 
-	if types.IsEmpty(user) {
+	if user.IsEmpty() {
 		return id
 	} else {
 		return GenerateIDForUser()

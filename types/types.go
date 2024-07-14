@@ -1,7 +1,5 @@
 package types
 
-import "reflect"
-
 type User struct {
 	ID       string `json:"-"`
 	Name     string `json:"name"`
@@ -11,11 +9,19 @@ type User struct {
 }
 
 type Post struct {
-	ID     string `json:"id"`
-	UserID string `json:"-"`
-	Text   string `json:"text"`
+	ID       string `json:"id"`
+	UserID   string `json:"-"`
+	User     User   `json:"user"`
+	ToPostID string `json:"topostid"`
+	Text     string `json:"text"`
+	Likes    []User `json:"likes"`
+	Comments []Post `json:"comments"`
 }
 
-func IsEmpty(value interface{}) bool {
-	return reflect.DeepEqual(value, reflect.Zero(reflect.TypeOf(value)).Interface())
+func (user User) IsEmpty() bool {
+	return user.ID == ""
+}
+
+func (post Post) IsEmpty() bool {
+	return post.ID == ""
 }

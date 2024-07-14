@@ -1,9 +1,7 @@
 package middleware
 
 import (
-	"fmt"
 	"go-api-1/models"
-	"go-api-1/types"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +20,6 @@ func AuthenticateForPage() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
-		fmt.Println("token: ", token)
 
 		if err != nil || !token.Valid {
 			c.Redirect(302, "/account")
@@ -37,7 +34,7 @@ func AuthenticateForPage() gin.HandlerFunc {
 
 			user, _ := userModel.GetByID(userId)
 
-			if types.IsEmpty(user) {
+			if user.IsEmpty() {
 				c.Redirect(302, "/account")
 				c.Abort()
 				return
@@ -69,7 +66,6 @@ func AuthenticateForAPI() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
-		fmt.Println("token: ", token)
 
 		if err != nil || !token.Valid {
 			c.JSON(302, gin.H{
@@ -87,7 +83,7 @@ func AuthenticateForAPI() gin.HandlerFunc {
 
 			user, _ := userModel.GetByID(userId)
 
-			if types.IsEmpty(user) {
+			if user.IsEmpty() {
 				c.JSON(302, gin.H{
 					"success": false,
 					"message": "Unauthorized",

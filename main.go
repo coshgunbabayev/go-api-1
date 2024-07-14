@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-api-1/handler"
+	"go-api-1/handlers"
 	"go-api-1/middleware"
 	"os"
 
@@ -26,27 +26,30 @@ func main() {
 
 	page := r.Group("/")
 	{
-		page.GET("/", middleware.AuthenticateForPage(), handler.GetHomePage)
-		page.GET("/account", handler.GetAccountPage)
-		page.GET("/user/:username", middleware.AuthenticateForPage(), handler.GetUserPage)
+		page.GET("/", middleware.AuthenticateForPage(), handlers.GetHomePage)
+		page.GET("/account", handlers.GetAccountPage)
+		page.GET("/user/:username", middleware.AuthenticateForPage(), handlers.GetUserPage)
+		page.GET("/post/:id", middleware.AuthenticateForPage(), handlers.GetPostPage)
 	}
 
 	api := r.Group("/api")
 	{
 		userAPI := api.Group("/user")
 		{
-			userAPI.GET("/", handler.GetUsers)
-			userAPI.GET("/:username", middleware.AuthenticateForAPI(), handler.GetUser)
-			userAPI.POST("/signup", handler.CreateUser)
-			userAPI.POST("/login", handler.LoginUser)
+			userAPI.GET("/", handlers.GetUsers)
+			userAPI.GET("/:username", middleware.AuthenticateForAPI(), handlers.GetUser)
+			userAPI.POST("/signup", handlers.CreateUser)
+			userAPI.POST("/login", handlers.LoginUser)
 		}
 
 		postAPI := api.Group("/post")
 		{
-			postAPI.GET("/", middleware.AuthenticateForAPI(), handler.GetPosts)
-			postAPI.GET("/:id", middleware.AuthenticateForAPI(), handler.GetPost)
-			postAPI.POST("/", middleware.AuthenticateForAPI(), handler.CreatePost)
-			postAPI.DELETE("/:id", middleware.AuthenticateForAPI(), handler.DeletePost)
+			postAPI.POST("/", middleware.AuthenticateForAPI(), handlers.CreatePost)
+			postAPI.GET("/", middleware.AuthenticateForAPI(), handlers.GetPosts)
+			postAPI.GET("/:id", middleware.AuthenticateForAPI(), handlers.GetPost)
+			postAPI.GET("/:id/like", middleware.AuthenticateForAPI(), handlers.GetLikeCaseOfPost)
+			postAPI.POST("/:id", middleware.AuthenticateForAPI(), handlers.CreateComment)
+			postAPI.DELETE("/:id", middleware.AuthenticateForAPI(), handlers.DeletePost)
 		}
 	}
 
