@@ -132,6 +132,90 @@ func GetLikeCaseOfPost(c *gin.Context) {
 	})
 }
 
+func LikePost(c *gin.Context) {
+	id := c.Param("id")
+
+	var postModel models.PostModel
+
+	post, err := postModel.GetByID(id)
+
+	if err != nil {
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "Post not found",
+		})
+		return
+	}
+
+	if post.IsEmpty() {
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "Post not found",
+		})
+		return
+	}
+
+	var userModel models.UserModel
+
+	user := userModel.GetReqUser(c)
+
+	if postModel.IsLikedByID(user.ID, post.ID) {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "You have already liked this post",
+		})
+		return
+	}
+
+	postModel.LikeByID(user.ID, post.ID)
+
+	c.JSON(200, gin.H{
+		"success": true,
+	})
+}
+
+func UnlikePost(c *gin.Context) {
+	id := c.Param("id")
+
+	var postModel models.PostModel
+
+	post, err := postModel.GetByID(id)
+
+	if err != nil {
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "Post not found",
+		})
+		return
+	}
+
+	if post.IsEmpty() {
+		c.JSON(404, gin.H{
+			"success": false,
+			"message": "Post not found",
+		})
+		return
+	}
+
+	var userModel models.UserModel
+
+	user := userModel.GetReqUser(c)
+
+	if !postModel.IsLikedByID(user.ID, post.ID) {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "You have not liked this post yet",
+		})
+		return
+	}
+
+	postModel.UnlikeByID(user.ID, post.ID)
+
+	c.JSON(200, gin.H{
+		"success": true,
+	})
+}
+
 func CreateComment(c *gin.Context) {
 	id := c.Param("id")
 

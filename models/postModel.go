@@ -137,6 +137,16 @@ func (*PostModel) IsLikedByID(userId string, postId string) bool {
 	return count > 0
 }
 
+func (*PostModel) LikeByID(userId string, postId string) {
+	db := database.GetDatabase()
+	db.Exec("INSERT INTO likes (userid, postid) VALUES (?,?)", userId, postId)
+}
+
+func (*PostModel) UnlikeByID(userId string, postId string) {
+	db := database.GetDatabase()
+	db.Exec("DELETE FROM likes WHERE userid =? AND postid =?", userId, postId)
+}
+
 func (*PostModel) CreateAsPost(post types.Post) error {
 	db := database.GetDatabase()
 

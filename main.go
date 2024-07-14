@@ -48,6 +48,8 @@ func main() {
 			postAPI.GET("/", middleware.AuthenticateForAPI(), handlers.GetPosts)
 			postAPI.GET("/:id", middleware.AuthenticateForAPI(), handlers.GetPost)
 			postAPI.GET("/:id/like", middleware.AuthenticateForAPI(), handlers.GetLikeCaseOfPost)
+			postAPI.PUT("/:id/like", middleware.AuthenticateForAPI(), handlers.LikePost)
+			postAPI.PUT("/:id/unlike", middleware.AuthenticateForAPI(), handlers.UnlikePost)
 			postAPI.POST("/:id", middleware.AuthenticateForAPI(), handlers.CreateComment)
 			postAPI.DELETE("/:id", middleware.AuthenticateForAPI(), handlers.DeletePost)
 		}

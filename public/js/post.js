@@ -38,7 +38,9 @@ async function getPostDetails() {
             res = await res.json();
 
             if (res.success) {
-                return res.liked ? '<button type="button" class="btn btn-secondary btn-sm" id="dislikebtn">Dislike</button>' : '<button type="button" class="btn btn-primary btn-sm" id="likebtn">Like</button>';
+                return res.liked ?
+                    `<button type="button" class="btn btn-secondary btn-sm" id="unlikebtn" onclick="unlike('${id}')">Unlike</button>` :
+                    `<button type="button" class="btn btn-primary btn-sm" id="likebtn" onclick="like('${id}')">Like</button>`;
             }
         }
 
@@ -54,7 +56,9 @@ async function getPostDetails() {
 
                     <h6 class="card-subtitle text-muted">${like(post.likes)} ${comment(post.comments)}</h6>
 
-                    ${await likedCase(post.id)}
+                    <div id="likebtns">
+                        ${await likedCase(post.id)}
+                    </div>
 
                 </div>
             </div>  
@@ -102,3 +106,41 @@ async function getPostDetails() {
     };
 
 }; getPostDetails();
+
+async function like(id) {
+    let res = await fetch(`/api/post/${id}/like`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+
+    res = await res.json();
+
+    if (res.success) {
+        document.getElementById("likebtns").innerHTML = `
+            <button type="button" class="btn btn-secondary btn-sm" id="unlikebtn" onclick="unlike('${id}')">Unlike</button>
+        `;
+    } else {
+        alert(res.message);
+    }
+};
+
+async function unlike(id) {
+    let res = await fetch(`/api/post/${id}/unlike`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+
+    res = await res.json();
+
+    if (res.success) {
+        document.getElementById("likebtns").innerHTML = `
+            <button type="button" class="btn btn-primary btn-sm" id="likebtn" onclick="like('${id}')">Like</button>
+        `;
+    } else {
+        alert(res.message);
+    }
+};
