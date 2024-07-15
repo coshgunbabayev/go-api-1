@@ -39,8 +39,8 @@ async function getPostDetails() {
 
             if (res.success) {
                 return res.liked ?
-                    `<button type="button" class="btn btn-secondary btn-sm" id="unlikebtn" onclick="unlike('${id}')">Unlike</button>` :
-                    `<button type="button" class="btn btn-primary btn-sm" id="likebtn" onclick="like('${id}')">Like</button>`;
+                    `<button type="button" class="btn btn-secondary btn-sm" onclick="unlike('${id}')">Unlike</button>` :
+                    `<button type="button" class="btn btn-primary btn-sm" onclick="like('${id}')">Like</button>`;
             }
         }
 
@@ -56,8 +56,12 @@ async function getPostDetails() {
 
                     <h6 class="card-subtitle text-muted">${like(post.likes)} ${comment(post.comments)}</h6>
 
-                    <div id="likebtns">
+                    <div id="likebtns-${post.id}" style="display: inline-block;">
                         ${await likedCase(post.id)}
+                    </div>
+
+                    <div id="commentbtns" style="display: inline-block;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="commentOpen()">Share comment</button>
                     </div>
 
                 </div>
@@ -107,40 +111,16 @@ async function getPostDetails() {
 
 }; getPostDetails();
 
-async function like(id) {
-    let res = await fetch(`/api/post/${id}/like`, {
-        method: 'PUT',
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
+function commentOpen() {
+    document.getElementById("commentbtns").innerHTML = `
+        <button type="button" class="btn btn-secondary btn-sm" onclick="commentClose()">Close</button>
+    `;
+    form.style.display = "flex";
+}
 
-    res = await res.json();
-
-    if (res.success) {
-        document.getElementById("likebtns").innerHTML = `
-            <button type="button" class="btn btn-secondary btn-sm" id="unlikebtn" onclick="unlike('${id}')">Unlike</button>
-        `;
-    } else {
-        alert(res.message);
-    }
-};
-
-async function unlike(id) {
-    let res = await fetch(`/api/post/${id}/unlike`, {
-        method: 'PUT',
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
-
-    res = await res.json();
-
-    if (res.success) {
-        document.getElementById("likebtns").innerHTML = `
-            <button type="button" class="btn btn-primary btn-sm" id="likebtn" onclick="like('${id}')">Like</button>
-        `;
-    } else {
-        alert(res.message);
-    }
-};
+function commentClose() {
+    document.getElementById("commentbtns").innerHTML = `
+        <button type="button" class="btn btn-primary btn-sm" onclick="commentOpen()">Share comment</button>
+    `;
+    form.style.display = "none";
+}
